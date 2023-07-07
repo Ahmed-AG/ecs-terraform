@@ -28,7 +28,6 @@ terraform apply --auto-approve
 export CLUSTER_NAME=$(terraform output -raw CLUSTER_NAME)
 export SG_GROUP=$(terraform output -raw SG_GROUP)
 export SUBNET_ID=$(terraform output -raw SUBNET_ID)
-export TASK_DEFINITION_FILE="task-definitions/service.json"
 export TASK_DEFINITION_NAME=$(terraform output -raw TASK_DEFINITION_NAME)
 ```
 
