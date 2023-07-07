@@ -1,6 +1,20 @@
 # ecs-terraform
 
-To deploy the cluster
+1. Set `backend.tf` 
+
+```bash
+terraform {
+  backend "s3" {
+    bucket         = <BUCKET NAME>
+    key            = <STATEFILE>
+    encrypt        = false
+    region         = <REGION>
+  }
+}
+```
+2. Deploy the cluster
+
+Run the followig commands
 
 ```bash
 terraform init
@@ -8,7 +22,7 @@ terraform plan
 terraform apply --auto-approve
 ```
 
-To set envirnoment variables:
+3. Set envirnoment variables:
 
 ```bash
 export CLUSTER_NAME=$(terraform output -raw CLUSTER_NAME)
@@ -18,7 +32,7 @@ export TASK_DEFINITION_FILE="task-definitions/service.json"
 export TASK_DEFINITION_NAME=$(terraform output -raw TASK_DEFINITION_NAME)
 ```
 
-To run a task
+4. Run a task
 
 ```bash
 python bin/run_task.py $CLUSTER_NAME $SUBNET_ID $SG_GROUP $TASK_DEFINITION_NAME
