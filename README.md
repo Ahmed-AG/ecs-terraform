@@ -14,7 +14,7 @@ terraform {
 ```
 2. Deploy the cluster
 
-Run the followig commands
+Run the Terraform commands
 
 ```bash
 terraform init
