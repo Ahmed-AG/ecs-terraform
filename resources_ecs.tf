@@ -12,7 +12,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_ecs_task_definition" "task_definition1" {
-  family                   = "Task1-terraform"
+  family                   = var.ecs_task_name
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 1024
@@ -21,11 +21,12 @@ resource "aws_ecs_task_definition" "task_definition1" {
 
 }
 
+# Not needed
 resource "aws_ecs_service" "service1" {
   name            = "Service1-terraform"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.task_definition1.arn
-  desired_count   = 1
+  desired_count   = 0
   launch_type     = "FARGATE"
   
   network_configuration {
