@@ -27,8 +27,3 @@ variable "ecs_task_name" {
   description = "Name of the ECS Cluster"
   default     = "Task-terraform-1" 
 }
-
-#variable "notification_emails" {
-#  type        = list(any)
-#  description = "Email addresses for pipeline notifications"
-#}
