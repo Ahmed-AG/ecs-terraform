@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "task_definition1" {
 
 }
 
-# Not needed
+# Not needed!
 #resource "aws_ecs_service" "service1" {
 #  name            = "Service1-terraform"
 #  cluster         = aws_ecs_cluster.ecs_cluster.id
