@@ -19,7 +19,7 @@ jobs:
           LW_API_KEY: ${{ secrets.LW_API_KEY }}
           LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
         run: |
-
+              echo $LW_API_KEY
              # Required to pass the GITHUB and Lacework (LW) environment variables to use
              env | grep "GITHUB_\|LW_\|CI_" > env.list
              # Required command based on what you want to scan in the repository
