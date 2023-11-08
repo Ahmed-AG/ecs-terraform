@@ -14,8 +14,8 @@ jobs:
       - name: Scan the repo for vulnerabilities in IaC
         env:
           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
-          LW_API_KEY: ${{ secrets.LW_API_KEY }}
-          LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
+          LW_API_KEY: ${{ secrets.API_KEY }}
+          LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
         run: |
              echo "$LW_API_KEY" |base64
              # Required to pass the GITHUB and Lacework (LW) environment variables to use
