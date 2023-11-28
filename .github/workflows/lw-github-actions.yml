@@ -17,7 +17,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::445240787754:role/github-actions
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/github-actions
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
       - name: Sts GetCallerIdentity
@@ -50,5 +50,4 @@ jobs:
         #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         #   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          aws sts get-caller-identity
           terraform apply --auto-approve tf.plan
