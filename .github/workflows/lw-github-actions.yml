@@ -45,19 +45,11 @@ jobs:
              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1)
              docker container cp "$CONTAINER_ID:/tmp/lacework-report*" .
 
-      # - name: Publish Lacework Junit Report
-      #   uses: mikepenz/action-junit-report@v4
-      #   # if: success() || failure() # always run even if the previous step fails
-      #   with:
-      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
-      #     report_paths: 'lacework.junit.xml'
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+      - name: Publish Lacework Junit Report
+        uses: mikepenz/action-junit-report@v4
+        # if: success() || failure() # always run even if the previous step fails
         with:
-          files: |
-            lacework-report.json
-          
+          report_paths: 'lacework-report.junit.xml'        
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3
         with:
