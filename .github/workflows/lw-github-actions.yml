@@ -39,7 +39,8 @@ jobs:
              # cat env.list 
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
              pwd
-             ls
+             ls 
+             ls /
              cat lacework.junit.xml
   Terraform-deploy:
     runs-on: ubuntu-latest
