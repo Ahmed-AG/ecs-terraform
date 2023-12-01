@@ -9,11 +9,14 @@ permissions:
       id-token: write
       contents: read    
 jobs:
-  build:
+  Initialize:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+  Authenticate-AWS:
+    runs-on: ubuntu-latest
+    steps:   
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
