@@ -37,7 +37,7 @@ jobs:
              echo "JUNIT_OUTPUT_FILE=/tmp/lacework.junit.xml"  >> env.list
              echo $LW_ACCOUNT
              # cat env.list 
-             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest  "/app/bin/init ; cat /tmp/lacework.junit.xml"
+             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest  '/app/bin/init ; cat /tmp/lacework.junit.xml'
             #  pwd
             #  ls 
             #  ls /
