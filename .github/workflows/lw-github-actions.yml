@@ -19,7 +19,7 @@ jobs:
           aws --version
           terraform --version
   Lacework-Scan:
-    runs-on: ubuntu-latest
+    runs-on: lacework/codesec-iac:latest
     needs: Initialize
     steps:
       - name: Checkout Code
@@ -30,14 +30,17 @@ jobs:
           LW_API_KEY: ${{ secrets.API_KEY }}
           LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
         run: |
-             env | grep "GITHUB_\|LW_\|CI_" > env.list
-             echo "SCAN_COMMAND=tf-scan" >> env.list
-             echo "WORKSPACE=src" >> env.list
-             #echo "EXIT_FLAG='Critical'" >> env.list 
-             echo "JUNIT_OUTPUT_FILE='/app/src/lacework.junit.xml'"  >> env.list
-             echo $LW_ACCOUNT
+            #  env | grep "GITHUB_\|LW_\|CI_" > env.list
+            #  echo "SCAN_COMMAND=tf-scan" >> env.list
+            #  echo "WORKSPACE=src" >> env.list
+            #  #echo "EXIT_FLAG='Critical'" >> env.list 
+            #  echo "JUNIT_OUTPUT_FILE='lacework.junit.xml'"  >> env.list
+            #  echo $LW_ACCOUNT
              # cat env.list 
-             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
+             export SCAN_COMMAND==tf-scan
+             export WORKSPACE=src
+             export JUNIT_OUTPUT_FILE='/app/src/lacework.junit.xml'
+             /app/bin/init
              pwd
              ls
              cat lacework.junit.xml
