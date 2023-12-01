@@ -36,19 +36,15 @@ jobs:
              #echo "EXIT_FLAG='Critical'" >> env.list 
              echo "JUNIT_OUTPUT_FILE=/tmp/lacework.junit.xml"  >> env.list
              echo $LW_ACCOUNT
-             # cat env.list 
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
-             ls 
-             docker ps -a
              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1)
              docker container cp "$CONTAINER_ID:/tmp/lacework.junit.xml" .
-             cat lacework.junit.xml
              docker inspect lacework/codesec-iac:latest
       - name: Publish Lacework Junit Report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          report_paths: 'lacework.junit.xml'
   Terraform-deploy:
     runs-on: ubuntu-latest
     needs: Lacework-Scan
