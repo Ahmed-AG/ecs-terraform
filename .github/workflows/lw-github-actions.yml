@@ -34,7 +34,7 @@ jobs:
              env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
              echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
              echo "WORKSPACE=src" >> env.list             
-             echo "EXIT_FLAG='critical'" >> env.list      # Cause the pipline to fail if any Critical Vulnerbailities are discovered
+             echo "EXIT_FLAG=critical" >> env.list      # Cause the pipline to fail if any Critical Vulnerbailities are discovered
              echo "JUNIT_OUTPUT_FILE=/tmp/lacework-report.junit.xml"  >> env.list
              echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
              
