@@ -43,7 +43,8 @@ jobs:
              
              # Copy the report outside the container
              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1)
-             docker container cp "$CONTAINER_ID:/tmp/lacework-report*" .
+             docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" .
+             docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" .
 
       - name: Publish Lacework Junit Report
         uses: mikepenz/action-junit-report@v4
