@@ -20,6 +20,7 @@ jobs:
           terraform --version
   Lacework-Scan:
     runs-on: ubuntu-latest
+    needs: Initialize
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -38,6 +39,7 @@ jobs:
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
   Terraform-deploy:
     runs-on: ubuntu-latest
+    needs: Lacework-Scan
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
