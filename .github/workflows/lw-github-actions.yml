@@ -36,6 +36,11 @@ jobs:
              echo $LW_ACCOUNT
              # cat env.list 
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
+  Terraform-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -45,11 +50,6 @@ jobs:
       - name: Sts GetCallerIdentity
         run: |
             aws sts get-caller-identity
-  Terraform-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
       - name: Terraform Plan
         run: |
              terraform init
