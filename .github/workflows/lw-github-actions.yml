@@ -36,12 +36,12 @@ jobs:
              echo $LW_ACCOUNT
              # cat env.list 
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
-             - name: configure aws credentials
-             uses: aws-actions/configure-aws-credentials@v4
-             with:
-               role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/github-actions
-               role-session-name: GitHub_to_AWS_via_FederatedOIDC
-               aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/github-actions
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
       - name: Sts GetCallerIdentity
         run: |
             aws sts get-caller-identity
