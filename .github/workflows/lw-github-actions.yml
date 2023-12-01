@@ -43,7 +43,7 @@ jobs:
              docker inspect lacework/codesec-iac:latest
       - name: Publish Lacework Junit Report
         uses: mikepenz/action-junit-report@v4
-        if: success() || failure() # always run even if the previous step fails
+        # if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: 'lacework.junit.xml'
       - name: 'Upload Artifact'
