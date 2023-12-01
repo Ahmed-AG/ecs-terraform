@@ -14,18 +14,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-  Authenticate-AWS:
-    runs-on: ubuntu-latest
-    steps:   
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/github-actions
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-      - name: Sts GetCallerIdentity
+      - name: Test Tools
         run: |
-          aws sts get-caller-identity
+          aws --version
+          terraform --version
+  Lacework-Scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
       - name: Lacework IaC Scan
         env:
           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
@@ -39,6 +36,20 @@ jobs:
              echo $LW_ACCOUNT
              # cat env.list 
              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
+             - name: configure aws credentials
+             uses: aws-actions/configure-aws-credentials@v4
+             with:
+               role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/github-actions
+               role-session-name: GitHub_to_AWS_via_FederatedOIDC
+               aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+      - name: Sts GetCallerIdentity
+        run: |
+            aws sts get-caller-identity
+  Terraform-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
       - name: Terraform Plan
         run: |
              terraform init
