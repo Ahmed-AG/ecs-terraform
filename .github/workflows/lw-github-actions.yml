@@ -1,4 +1,4 @@
-name: lacework-iac-scan
+name: lacework-iac-scan-pr
 on:
   push:
     branches:
@@ -54,7 +54,7 @@ jobs:
       - name: Publish Lacework Junit Report
         uses: mikepenz/action-junit-report@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
           report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
   Terraform-Deploy:
     runs-on: ubuntu-latest
