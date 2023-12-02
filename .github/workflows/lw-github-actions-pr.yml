@@ -47,7 +47,7 @@ jobs:
         uses: xportation/junit-coverage-report@main
         with:
           junit-path: /tmp/iac_reports/lacework-report.junit.xml  
-          # coverage-path: ./reports/coverage/coverage.xml
+          coverage-path: /tmp/iac_reports/lacework-report.junit.xml
       # - name: Publish Lacework Results
       #   uses: dorny/test-reporter@v1
       #   if: success() || failure()
