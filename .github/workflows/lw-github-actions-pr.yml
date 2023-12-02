@@ -42,13 +42,15 @@ jobs:
              cat /tmp/iac_reports/lacework-report.junit.xml
              
              # Set output
+             reportjson=$(cat /tmp/iac_reports/lacework-report.junit.xml)
+             echo "::set-output name=iac_output::$reportjson"
             #  cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[]| "Finding",.severity,.sid,.title,.filePath,.line,.pass' > findings_summary.txt
             #  cat findings_summary.txt
             #  echo "iac_output=$(cat findings_summary.txt)" >> $GITHUB_OUTPUT
-      - name: Test Reports
-        uses: xportation/junit-coverage-report@main
-        with:
-          junit-path: /tmp/iac_reports/lacework-report.junit.xml  
+      # - name: Test Reports
+      #   uses: xportation/junit-coverage-report@main
+      #   with:
+      #     junit-path: /tmp/iac_reports/lacework-report.junit.xml  
           # coverage-path: /tmp/iac_reports/lacework-report.junit.xml
       # - name: Publish Lacework Results
       #   uses: dorny/test-reporter@v1
@@ -57,18 +59,18 @@ jobs:
       #     name: "Lacework JUnit"
       #     path: "/tmp/iac_reports/lacework-report.junit.xml"
       #     reporter: "java-junit" 
-      # - name: Update Pull Request
-      #   uses: actions/github-script@v6
-      #   if: github.event_name == 'pull_request'
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     script: |
-      #       const output = "${{ steps.laceworkscan.outputs.iac_output }}"
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = "${{ steps.laceworkscan.outputs.iac_output }}"
 
-      #       github.rest.issues.createComment({
-      #       issue_number: context.issue.number,
-      #       owner: context.repo.owner,
-      #       repo: context.repo.repo,
-      #       body: output
-      #       })              
+            github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+            })              
       
