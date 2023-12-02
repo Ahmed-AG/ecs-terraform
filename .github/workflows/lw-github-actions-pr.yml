@@ -29,14 +29,17 @@ jobs:
              echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
              
              # Run the Scan
-             IAC_OUTPUT=$(docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest)
+             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
              
              # Copy the report outside lacework/codesec-iac:latest container
              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1) # Extracts the latest container ID (Inside a pipeline there should be only one anyways)
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
-             echo "IAC_OUTPUT=$IAC_OUTPUT" >> $GITHUB_OUTPUT
+             
+             # Set output
+             
+             echo "IAC_OUTPUT=$(cat /tmp/lacework-report.json)" >> $GITHUB_OUTPUT
 
       # - name: 'Upload Artifacts'
       #   uses: actions/upload-artifact@v3
