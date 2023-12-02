@@ -38,7 +38,7 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
              
              # Set output
-             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].severity'
+             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].severity,.[].sid,.[].title,.[].filePath,.[].line'
             # > findings_summary.txt
             #  cat findings_summary.txt
             #  echo "iac_output=$(cat findings_summary.txt)" >> $GITHUB_OUTPUT
