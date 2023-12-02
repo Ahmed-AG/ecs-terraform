@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - 'main'
-  pull_request:
   workflow_dispatch:
 permissions:
       id-token: write
@@ -55,7 +54,14 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         with:
           # github-token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
+          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'     
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: "Lacework JUnit"
+          path: "/tmp/iac_reports/lacework-report.junit.xml"
+          reporter: "java-junit"   
   Terraform-Deploy:
     runs-on: ubuntu-latest
     needs: Lacework-Scanner
