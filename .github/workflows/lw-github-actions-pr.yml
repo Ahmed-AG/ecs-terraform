@@ -36,6 +36,7 @@ jobs:
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
+             echo "IAC_OUTPUT=$IAC_OUTPUT" >> $GITHUB_OUTPUT
 
       # - name: 'Upload Artifacts'
       #   uses: actions/upload-artifact@v3
