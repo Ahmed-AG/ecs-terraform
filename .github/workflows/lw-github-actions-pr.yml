@@ -13,6 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Lacework IaC Scan
+        id: lacework-scan
         env:
           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
           LW_API_KEY: ${{ secrets.API_KEY }}
@@ -41,14 +42,16 @@ jobs:
       #   with:
       #     name: Lacework Junit Report
       #     path: /tmp/iac_reports/*
-      
+
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = "#### HELLO ###"
+            const output = "#### Lacework IaC Report ###
+              ${{steps.lacework-scan.outcome}}"
+
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
