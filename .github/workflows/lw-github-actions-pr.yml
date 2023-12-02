@@ -39,7 +39,7 @@ jobs:
              
              # Set output
              
-             echo "IAC_OUTPUT=$(cat /tmp/lacework-report.json)" >> $GITHUB_OUTPUT
+             echo "iac_output=$(cat /tmp/lacework-report.json)" >> $GITHUB_OUTPUT
 
       # - name: 'Upload Artifacts'
       #   uses: actions/upload-artifact@v3
@@ -53,7 +53,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = "${{ steps.laceworkscan.outputs.IAC_OUTPUT }}"
+            const output = "${{ steps.laceworkscan.outputs.iac_output }}"
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
