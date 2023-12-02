@@ -7,6 +7,7 @@ permissions:
       contents: read 
       pull-requests: write 
       security-events: write
+      actions: read
 jobs:
   Lacework-Scanner:
     runs-on: ubuntu-latest
@@ -43,12 +44,13 @@ jobs:
             #  cat findings_summary.txt
             #  echo "iac_output=$(cat findings_summary.txt)" >> $GITHUB_OUTPUT
 
-      # - name: 'Upload Artifacts'
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Lacework Junit Report
-      #     path: /tmp/iac_reports/*
-
+      - name: Publish Lacework Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: "Lacework JUnit"
+          path: "/tmp/iac_reports/lacework-report.junit.xml"
+          reporter: "java-junit" 
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
@@ -62,12 +64,4 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: output
-            })            
-
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: "Lacework JUnit"
-          path: "/tmp/iac_reports/lacework-report.junit.xml"
-          reporter: "java-junit"   
+            })              
