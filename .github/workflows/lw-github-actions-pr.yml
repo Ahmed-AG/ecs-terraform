@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
 permissions:
       id-token: write
-      contents: read    
+      contents: read 
+      pull-requests: write   
 jobs:
   Initialize:
     runs-on: ubuntu-latest
@@ -51,10 +52,19 @@ jobs:
         with:
           name: Lacework Junit Report
           path: /tmp/iac_reports/*
+
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            
+
       - name: Publish Lacework Junit Report
         uses: mikepenz/action-junit-report@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
   Terraform-Deploy:
     runs-on: ubuntu-latest
