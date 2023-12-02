@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 permissions:
       id-token: write
-      contents: read    
+      contents: read   
+      actions: read 
 jobs:
   Initialize:
     runs-on: ubuntu-latest
