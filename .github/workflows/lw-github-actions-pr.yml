@@ -29,7 +29,7 @@ jobs:
              echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
              
              # Run the Scan
-             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest
+             IAC_OUTPUT=$(docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:latest)
              
              # Copy the report outside lacework/codesec-iac:latest container
              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1) # Extracts the latest container ID (Inside a pipeline there should be only one anyways)
@@ -49,7 +49,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = "${{ jobs.Lacework-Scanner.steps.laceworkscan.outputs }}"
+            const output = "${{ steps.laceworkscan.outputs.IAC_OUTPUT }}"
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
