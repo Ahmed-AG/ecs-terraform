@@ -36,13 +36,12 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
-      - name: 'Upload Artifacts'
-        uses: actions/upload-artifact@v3
-        with:
-          name: Lacework Junit Report
-          path: /tmp/iac_reports/*
-
-
+      # - name: 'Upload Artifacts'
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Lacework Junit Report
+      #     path: /tmp/iac_reports/*
+      
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
@@ -50,9 +49,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = "#### HELLO ###"
-            
 
-      - name: Publish Lacework Junit Report
-        uses: mikepenz/action-junit-report@v4
-        with:
-          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
+            github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+            })            
+
+      # - name: Publish Lacework Junit Report
+      #   uses: mikepenz/action-junit-report@v4
+      #   with:
+      #     report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
