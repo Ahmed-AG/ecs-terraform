@@ -40,16 +40,16 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
              # Create results summary
-             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass'| wc -l)
+             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.jsonml |jq -r '.[].findings | .[].pass'| wc -l)
              echo "TESTS: $TESTS" 
-             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
              echo "TESTS_PASSED: $TESTS_PASSED" 
-             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
              echo "TESTS_FAILED: $TESTS_FAILED" 
 
-             cat $IAC_REPORTS_DIR/lacework-report.junit.xml  # |jq -r '.[].findings | .[].pass' 
-             cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false
-             cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l
+             cat $IAC_REPORTS_DIR/lacework-report.json  # |jq -r '.[].findings | .[].pass' 
+             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false
+             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l
 
              echo "TESTS=$TESTS" >> "$GITHUB_ENV"
              echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
