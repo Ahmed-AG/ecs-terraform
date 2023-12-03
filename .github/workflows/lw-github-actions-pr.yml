@@ -62,5 +62,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: output
-            })              
-            # const output = "${{ steps.laceworkscan.outputs.iac_output }}"
+            })  
+            
+            
+      # const output = "${{ steps.laceworkscan.outputs.iac_output }}"
