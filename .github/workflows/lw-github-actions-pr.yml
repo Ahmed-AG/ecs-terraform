@@ -40,11 +40,11 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
              # Create results summary
-             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass'| wc)
+             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass'| wc -l)
              echo "TESTS: $TESTS" 
-             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep true | wc)
+             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep true | wc -l)
              echo "TESTS_PASSED: $TESTS_PASSED" 
-             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc)
+             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l)
              echo "TESTS_FAILED: $TESTS_FAILED" 
 
         
