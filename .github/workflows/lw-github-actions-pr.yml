@@ -66,7 +66,6 @@ jobs:
           script: |
             const message = "Verify the Lacework IaC scanning results before merging!"
             const test_results = " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>7 failed</td></tr></table>"
-            echo $TEST
 
             const output = "${{ TESTS }}" + message + test_results
 
