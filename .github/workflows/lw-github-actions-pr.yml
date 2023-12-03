@@ -38,14 +38,17 @@ jobs:
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
-             
-      - name: Publish Lacework Results
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
+        
+      - name: 'Upload Artifacts'
+        uses: actions/upload-artifact@v3
         with:
-          name: "Lacework JUnit"
-          path: "/tmp/iac_reports/lacework-report.junit.xml"
-          reporter: "java-junit" 
+          name: Lacework Junit Report
+          path: /tmp/iac_reports/*
+      - name: Publish Lacework Junit Report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'       
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
