@@ -5,7 +5,9 @@ on:
 permissions:
       id-token: write
       contents: read 
-      pull-requests: write   
+      pull-requests: write 
+      security-events: write
+      actions: read
 jobs:
   Lacework-Scanner:
     runs-on: ubuntu-latest
@@ -36,34 +38,44 @@ jobs:
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
-             
-             # Set output
-             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[]| "Finding",.severity,.sid,.title,.filePath,.line,.pass' > findings_summary.txt
-             cat findings_summary.txt
-             echo "iac_output=$(cat findings_summary.txt)" >> $GITHUB_OUTPUT
 
-      # - name: 'Upload Artifacts'
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Lacework Junit Report
-      #     path: /tmp/iac_reports/*
+             # Create results summary
+             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
+             echo "TESTS: $TESTS" 
+             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+             echo "TESTS_PASSED: $TESTS_PASSED" 
+             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+             echo "TESTS_FAILED: $TESTS_FAILED" 
 
+             echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+             echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+             echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+        
+      - name: 'Upload Artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Lacework Junit Report
+          path: /tmp/iac_reports/*
+      - name: Publish Lacework Junit Report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
+          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'       
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = "${{ steps.laceworkscan.outputs.iac_output }}"
+            const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
+            const message = "Verify the Lacework IaC scanning results before merging!"
+            const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} ran</td><td>${TESTS_PASSED} passed</td><td>${TESTS_FAILED} failed</td></tr></table>`
+
+            const output = message + test_results
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: output
-            })            
-
-      # - name: Publish Lacework Junit Report
-      #   uses: mikepenz/action-junit-report@v4
-      #   with:
-      #     report_paths: '/tmp/iac_reports/lacework-report.junit.xml'        
+            })  
