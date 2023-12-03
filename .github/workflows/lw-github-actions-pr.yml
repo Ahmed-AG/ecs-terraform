@@ -55,7 +55,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = "Verify the Lacework IaC scanning results before merging!" + " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Skipped ⏭️</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>0 skipped</td><td>7 failed</td></tr></table>"
+            const message = "Verify the Lacework IaC scanning results before merging!"
+            const test_results = " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Skipped ⏭️</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>0 skipped</td><td>7 failed</td></tr></table>"
+
+            const output = message + test_results
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
