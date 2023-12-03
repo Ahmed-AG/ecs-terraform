@@ -65,7 +65,7 @@ jobs:
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
             const message = "Verify the Lacework IaC scanning results before merging!"
