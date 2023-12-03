@@ -46,6 +46,7 @@ jobs:
              echo "TESTS_PASSED: $TESTS_PASSED" 
              TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l)
              echo "TESTS_FAILED: $TESTS_FAILED" 
+             echo "TESTS=$TESTS" >> "$GITHUB_ENV"
 
         
       - name: 'Upload Artifacts'
@@ -67,7 +68,7 @@ jobs:
             const message = "Verify the Lacework IaC scanning results before merging!"
             const test_results = " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>7 failed</td></tr></table>"
 
-            const output = "${{ steps.laceworkscan.env }}" + message + test_results
+            const output = "${{ TESTS }}" + message + test_results
 
 
             github.rest.issues.createComment({
