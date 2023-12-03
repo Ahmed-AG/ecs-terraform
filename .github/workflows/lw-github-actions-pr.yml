@@ -40,14 +40,12 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
              # Create results summary
-             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.jsonml |jq -r '.[].findings | .[].pass'| wc -l)
+             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
              echo "TESTS: $TESTS" 
              TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
              echo "TESTS_PASSED: $TESTS_PASSED" 
              TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
              echo "TESTS_FAILED: $TESTS_FAILED" 
-
-             cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l
 
              echo "TESTS=$TESTS" >> "$GITHUB_ENV"
              echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
@@ -69,14 +67,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            console.log(context)
             const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
-            console.log(TESTS)
             const message = "Verify the Lacework IaC scanning results before merging!"
             const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} ran</td><td>${TESTS_PASSED} passed</td><td>${TESTS_FAILED} failed</td></tr></table>`
 
             const output = message + test_results
-
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -84,6 +79,3 @@ jobs:
             repo: context.repo.repo,
             body: output
             })  
-            
-            
-      # const output = "${{ steps.laceworkscan.env.TESTS }}"
