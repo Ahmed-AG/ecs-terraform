@@ -73,7 +73,7 @@ jobs:
             const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
             console.log(TESTS)
             const message = "Verify the Lacework IaC scanning results before merging!"
-            const test_results = '<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>${TESTS} ran</td><td>${TESTS_PASSED} passed</td><td>${TESTS_FAILED} failed</td></tr></table>''
+            const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} ran</td><td>${TESTS_PASSED} passed</td><td>${TESTS_FAILED} failed</td></tr></table>`
 
             const output = message + test_results
 
