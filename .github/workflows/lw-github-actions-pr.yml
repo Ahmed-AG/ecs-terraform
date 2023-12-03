@@ -46,7 +46,14 @@ jobs:
              echo "TESTS_PASSED: $TESTS_PASSED" 
              TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l)
              echo "TESTS_FAILED: $TESTS_FAILED" 
+
+             cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false| wc -l
+             cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep false
+             cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' 
+
              echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+             echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+             echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
         
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v3
@@ -65,7 +72,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log(context)
-            const { TESTS, LAST_NAME } = process.env
+            const { TESTS } = process.env
             console.log(TESTS)
             const message = "Verify the Lacework IaC scanning results before merging!"
             const test_results = " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>7 failed</td></tr></table>"
