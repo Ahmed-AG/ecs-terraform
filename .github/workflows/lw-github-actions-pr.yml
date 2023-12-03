@@ -56,7 +56,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = "Verify the Lacework IaC scanning results before merging!"
-            # const output = "${{ steps.laceworkscan.outputs.iac_output }}"
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -64,4 +63,4 @@ jobs:
             repo: context.repo.repo,
             body: output
             })              
-      
+            # const output = "${{ steps.laceworkscan.outputs.iac_output }}"
