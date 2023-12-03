@@ -40,7 +40,7 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
              # Create results summary
-             TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass'| wc)
+             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass'| wc)
              echo "TESTS: $TESTS" 
              TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.junit.xml |jq -r '.[].findings | .[].pass' | grep true | wc)
              echo "TESTS_PASSED: $TESTS_PASSED" 
@@ -67,7 +67,8 @@ jobs:
             const message = "Verify the Lacework IaC scanning results before merging!"
             const test_results = " <table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>JUnit Test Report</td><td>7 ran</td><td>0 passed</td><td>7 failed</td></tr></table>"
 
-            const output = message + test_results
+            const output = message + test_results + "${{ steps.laceworkscan.env.TESTS }}"
+
 
             github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -77,4 +78,4 @@ jobs:
             })  
             
             
-      # const output = "${{ steps.laceworkscan.outputs.iac_output }}"
+      # const output = "${{ steps.laceworkscan.env.TESTS }}"
