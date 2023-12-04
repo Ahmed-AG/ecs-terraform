@@ -6,8 +6,10 @@ on:
   workflow_dispatch:
 permissions:
       id-token: write
-      contents: read   
-      actions: read 
+      contents: read 
+      # pull-requests: write 
+      security-events: write
+      actions: read
 jobs:
   Initialize:
     runs-on: ubuntu-latest
@@ -17,12 +19,13 @@ jobs:
           aws --version
           terraform --version
   Lacework-Scanner:
-    runs-on: ubuntu-latest
     needs: Initialize
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Lacework IaC Scan
+        id: laceworkscan
         env:
           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
           LW_API_KEY: ${{ secrets.API_KEY }}
@@ -46,23 +49,32 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
+             RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
+             echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
+        
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v3
         with:
           name: Lacework Junit Report
           path: /tmp/iac_reports/*
-      - name: Publish Lacework Junit Report
-        uses: mikepenz/action-junit-report@v4
-        with:
-          # github-token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'     
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: "Lacework JUnit"
-          path: "/tmp/iac_reports/lacework-report.junit.xml"
-          reporter: "java-junit"   
+      - name: Publish IaC Scan Results
+        run: |
+            # Create results summary
+            cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l
+            export TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
+            echo "TESTS: $TESTS" 
+            TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+            echo "TESTS_PASSED: $TESTS_PASSED" 
+            TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+            echo "TESTS_FAILED: $TESTS_FAILED" 
+
+            # Set GITHUB_ENV
+            echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+            echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+            echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+
+            # Adding a Step Summary to the workflow usint $GITHUB_STEP_SUMMARY
+            echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
   Terraform-Deploy:
     runs-on: ubuntu-latest
     needs: Lacework-Scanner
@@ -80,8 +92,8 @@ jobs:
             aws sts get-caller-identity
       - name: Terraform Plan
         run: |
-             terraform init
-             terraform plan -out tf.plan
+              terraform init
+              terraform plan -out tf.plan
       - name: Terraform Apply
         run: |
           terraform apply --auto-approve tf.plan
