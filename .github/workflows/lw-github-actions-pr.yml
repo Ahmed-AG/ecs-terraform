@@ -39,6 +39,7 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
+             # Set GITHUB_ENV
              RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
              echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
         
