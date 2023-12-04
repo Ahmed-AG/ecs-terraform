@@ -22,7 +22,7 @@ jobs:
           LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
         run: |
              # Setup 
-             export IAC_REPORTS_DIR="/tmp/iac_reports"
+             IAC_REPORTS_DIR="/tmp/iac_reports"
              env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
              echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
              echo "WORKSPACE=src" >> env.list             
@@ -38,6 +38,9 @@ jobs:
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
+
+             RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
+             echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
         
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v3
@@ -47,12 +50,12 @@ jobs:
       - name: Publish IaC Scan Results
         run: |
             # Create results summary
-            cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l
-            export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
+            cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l
+            export TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
             echo "TESTS: $TESTS" 
-            TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+            TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
             echo "TESTS_PASSED: $TESTS_PASSED" 
-            TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+            TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep false| wc -l)
             echo "TESTS_FAILED: $TESTS_FAILED" 
 
             # Set GITHUB_ENV
