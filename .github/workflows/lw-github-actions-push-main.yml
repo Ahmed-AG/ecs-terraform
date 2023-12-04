@@ -1,4 +1,4 @@
-name: lacework-iac-scan-pr
+name: lacework-iac-scan-push-main
 on:
   push:
     branches:
@@ -60,8 +60,7 @@ jobs:
       - name: Publish IaC Scan Results
         run: |
             # Create results summary
-            cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l
-            export TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
+            TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
             echo "TESTS: $TESTS" 
             TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
             echo "TESTS_PASSED: $TESTS_PASSED" 
