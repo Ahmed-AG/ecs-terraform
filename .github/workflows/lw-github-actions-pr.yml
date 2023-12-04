@@ -47,6 +47,7 @@ jobs:
       - name: Publish IaC Scan Results
         run: |
             # Create results summary
+            cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l
             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
             echo "TESTS: $TESTS" 
             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
