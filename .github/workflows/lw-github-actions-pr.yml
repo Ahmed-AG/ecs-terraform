@@ -26,7 +26,7 @@ jobs:
              env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
              echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
              echo "WORKSPACE=src" >> env.list             
-             echo "EXIT_FLAG=critical" >> env.list      # Cause the pipline to fail if any Critical Vulnerbailities are discovered
+             echo "EXIT_FLAG=critical" >> env.list      # Cause the pipline to fail if any Critical Vulnerabilities are discovered
              echo "JUNIT_OUTPUT_FILE=/tmp/lacework-report.junit.xml"  >> env.list
              echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
              
@@ -63,7 +63,7 @@ jobs:
             echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
             echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
 
-            # Adding a Step Summary to the workflow usint $GITHUB_STEP_SUMMARY
+            # Adding a Step Summary to the workflow using $GITHUB_STEP_SUMMARY
             echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
 
       - name: Update Pull Request
