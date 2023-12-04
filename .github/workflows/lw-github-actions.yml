@@ -22,6 +22,7 @@ jobs:
           terraform --version
 
   Lacework-Scanner:
+    needs: Initialize
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
