@@ -22,7 +22,7 @@ jobs:
           LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
         run: |
              # Setup 
-             IAC_REPORTS_DIR="/tmp/iac_reports"
+             export IAC_REPORTS_DIR="/tmp/iac_reports"
              env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
              echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
              echo "WORKSPACE=src" >> env.list             
