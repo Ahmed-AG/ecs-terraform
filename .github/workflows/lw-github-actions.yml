@@ -1,28 +1,33 @@
-name: lacework-iac-scan-pr
+name: lacework-iac-scan
 on:
   push:
     branches:
       - 'main'
+  pull_request:
   workflow_dispatch:
 permissions:
       id-token: write
-      contents: read   
-      actions: read 
+      contents: read 
+      pull-requests: write 
+      security-events: write
+      actions: read
 jobs:
   Initialize:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Test Tools
         run: |
           aws --version
           terraform --version
+
   Lacework-Scanner:
     runs-on: ubuntu-latest
-    needs: Initialize
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Lacework IaC Scan
+        id: laceworkscan
         env:
           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
           LW_API_KEY: ${{ secrets.API_KEY }}
@@ -46,17 +51,53 @@ jobs:
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
+             RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
+             echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
+        
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v3
         with:
           name: Lacework Junit Report
           path: /tmp/iac_reports/*
-      - name: Publish Lacework Junit Report
-        uses: mikepenz/action-junit-report@v4
+      - name: Publish IaC Scan Results
+        run: |
+            # Create results summary
+            cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l
+            export TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
+            echo "TESTS: $TESTS" 
+            TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+            echo "TESTS_PASSED: $TESTS_PASSED" 
+            TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+            echo "TESTS_FAILED: $TESTS_FAILED" 
+
+            # Set GITHUB_ENV
+            echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+            echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+            echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+
+            # Adding a Step Summary to the workflow usint $GITHUB_STEP_SUMMARY
+            echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
         with:
           # github-token: ${{ secrets.GITHUB_TOKEN }}
-          report_paths: '/tmp/iac_reports/lacework-report.junit.xml'     
+          script: |
+            const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
+            const message = "Verify the Lacework IaC scanning results before merging!"
+            const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>`
+
+            const output = message + test_results
+
+            github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+            })  
   Terraform-Deploy:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     needs: Lacework-Scanner
     steps:
@@ -73,8 +114,8 @@ jobs:
             aws sts get-caller-identity
       - name: Terraform Plan
         run: |
-             terraform init
-             terraform plan -out tf.plan
+              terraform init
+              terraform plan -out tf.plan
       - name: Terraform Apply
         run: |
           terraform apply --auto-approve tf.plan
