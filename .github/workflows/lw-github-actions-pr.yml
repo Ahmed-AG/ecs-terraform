@@ -38,21 +38,6 @@ jobs:
              mkdir $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
-
-             # Create results summary
-             export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
-             echo "TESTS: $TESTS" 
-             TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
-             echo "TESTS_PASSED: $TESTS_PASSED" 
-             TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
-             echo "TESTS_FAILED: $TESTS_FAILED" 
-
-             echo "TESTS=$TESTS" >> "$GITHUB_ENV"
-             echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
-             echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
-
-             # Adding a Step Summary
-             echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
         
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v3
@@ -61,8 +46,22 @@ jobs:
           path: /tmp/iac_reports/*
       - name: Publish IaC Scan Results
         run: |
-            # Adding a Step Summary
+            # Create results summary
+            export TESTS=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass'| wc -l)
+            echo "TESTS: $TESTS" 
+            TESTS_PASSED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+            echo "TESTS_PASSED: $TESTS_PASSED" 
+            TESTS_FAILED=$(cat $IAC_REPORTS_DIR/lacework-report.json |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+            echo "TESTS_FAILED: $TESTS_FAILED" 
+
+            # Set GITHUB_ENV
+            echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+            echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+            echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+
+            # Adding a Step Summary to the workflow usint $GITHUB_STEP_SUMMARY
             echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
+
       - name: Update Pull Request
         uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
