@@ -44,7 +44,7 @@ jobs:
              echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
         
       - name: 'Upload Artifacts'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Lacework Junit Report
           path: /tmp/iac_reports/*
