@@ -38,13 +38,19 @@ jobs:
         uses: actions/checkout@v3
       - name: Lacework IaC Scan
         id: laceworkscan
-        env:
-          LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
-          # LW_SUBACCOUNT: ${{ secrets.LW_SUBACCOUNT }}
-          LW_API_KEY: ${{ secrets.API_KEY }}
-          LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
+        # env:
+        #   LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
+        #   # LW_SUBACCOUNT: ${{ secrets.LW_SUBACCOUNT }}
+        #   LW_API_KEY: ${{ secrets.API_KEY }}
+        #   LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
         run: |
-             docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable lacework iac scan
+            env | grep "GITHUB_\|LW_\|CI_" > env.list
+            echo "LW_ACCOUNT=${{ secrets.LW_ACCOUNT }}" >> env.list
+            # echo "LW_SUBACCOUNT=${{ secrets.LW_SUBACCOUNT }}" >> env.list
+            echo "LW_API_KEY=${{ secrets.API_KEY }}" >> env.list
+            echo "LW_API_SECRET=${{ secrets.API_SECRET_TOKEN }}" >> env.list
+            echo "EXIT_FLAG=CRITICAL=1" >> env.list
+            docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable lacework iac scan
     #          # Setup 
     #          IAC_REPORTS_DIR="/tmp/iac_reports"
     #          env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
