@@ -51,7 +51,7 @@ jobs:
             echo "LW_API_SECRET=${{ secrets.API_SECRET_TOKEN }}" >> env.list
             echo "EXIT_FLAG=CRITICAL=1" >> env.list
             docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable lacework iac scan
-            ls -l
+            docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable ls -l
     #          # Setup 
     #          IAC_REPORTS_DIR="/tmp/iac_reports"
     #          env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
