@@ -1,86 +1,86 @@
-name: lacework-iac-scan-pr
-on:
-  pull_request:
-  workflow_dispatch:
-permissions:
-      id-token: write
-      contents: read 
-      pull-requests: write 
-      security-events: write
-      actions: read
-jobs:
-  Lacework-Scanner:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Lacework IaC Scan
-        id: laceworkscan
-        env:
-          LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
-          # LW_SUBACCOUNT: ${{ secrets.LW_SUBACCOUNT }}
-          LW_API_KEY: ${{ secrets.API_KEY }}
-          LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
-        run: |
-             # Setup 
-             IAC_REPORTS_DIR="/tmp/iac_reports"
-             env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
-             echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
-             echo "WORKSPACE=src" >> env.list             
-             echo "EXIT_FLAG=critical" >> env.list      # Cause the pipline to fail if any Critical Vulnerabilities are discovered
-             echo "JUNIT_OUTPUT_FILE=/tmp/lacework-report.junit.xml"  >> env.list
-             echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
+# name: lacework-iac-scan-pr
+# on:
+#   pull_request:
+#   workflow_dispatch:
+# permissions:
+#       id-token: write
+#       contents: read 
+#       pull-requests: write 
+#       security-events: write
+#       actions: read
+# jobs:
+#   Lacework-Scanner:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+#       - name: Lacework IaC Scan
+#         id: laceworkscan
+#         env:
+#           LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
+#           # LW_SUBACCOUNT: ${{ secrets.LW_SUBACCOUNT }}
+#           LW_API_KEY: ${{ secrets.API_KEY }}
+#           LW_API_SECRET: ${{ secrets.API_SECRET_TOKEN }}
+#         run: |
+#              # Setup 
+#              IAC_REPORTS_DIR="/tmp/iac_reports"
+#              env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
+#              echo "SCAN_COMMAND=tf-scan" >> env.list      # Configure the scanner to run Terraform Scan
+#              echo "WORKSPACE=src" >> env.list             
+#              echo "EXIT_FLAG=critical" >> env.list      # Cause the pipline to fail if any Critical Vulnerabilities are discovered
+#              echo "JUNIT_OUTPUT_FILE=/tmp/lacework-report.junit.xml"  >> env.list
+#              echo "JSON_OUTPUT_FILE=/tmp/lacework-report.json"  >> env.list
              
-             # Run the Scan
-             docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:v1.0.14
+#              # Run the Scan
+#              docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec-iac:v1.0.14
              
-             # Copy the report outside lacework/codesec-iac:latest container
-             CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1) # Extracts the latest container ID (Inside a pipeline there should be only one anyways)
-             mkdir $IAC_REPORTS_DIR
-             docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
-             docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
+#              # Copy the report outside lacework/codesec-iac:latest container
+#              CONTAINER_ID=$(docker ps -a |grep lacework |head -n1 |cut -d ' ' -f1) # Extracts the latest container ID (Inside a pipeline there should be only one anyways)
+#              mkdir $IAC_REPORTS_DIR
+#              docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
+#              docker container cp "$CONTAINER_ID:/tmp/lacework-report.junit.xml" $IAC_REPORTS_DIR
 
-             # Set GITHUB_ENV
-             RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
-             echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
+#              # Set GITHUB_ENV
+#              RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
+#              echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
         
-      - name: 'Upload Artifacts'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Lacework Junit Report
-          path: /tmp/iac_reports/*
-      - name: Publish IaC Scan Results
-        run: |
-            # Create results summary
-            TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
-            echo "TESTS: $TESTS" 
-            TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
-            echo "TESTS_PASSED: $TESTS_PASSED" 
-            TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep false| wc -l)
-            echo "TESTS_FAILED: $TESTS_FAILED" 
+#       - name: 'Upload Artifacts'
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: Lacework Junit Report
+#           path: /tmp/iac_reports/*
+#       - name: Publish IaC Scan Results
+#         run: |
+#             # Create results summary
+#             TESTS=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass'| wc -l)
+#             echo "TESTS: $TESTS" 
+#             TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep true | wc -l)
+#             echo "TESTS_PASSED: $TESTS_PASSED" 
+#             TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.[].findings | .[].pass' | grep false| wc -l)
+#             echo "TESTS_FAILED: $TESTS_FAILED" 
 
-            # Set GITHUB_ENV
-            echo "TESTS=$TESTS" >> "$GITHUB_ENV"
-            echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
-            echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+#             # Set GITHUB_ENV
+#             echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+#             echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+#             echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
 
-            # Adding a Step Summary to the workflow using $GITHUB_STEP_SUMMARY
-            echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
+#             # Adding a Step Summary to the workflow using $GITHUB_STEP_SUMMARY
+#             echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
 
-      - name: Update Pull Request with a comment
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
-            const message = "Verify the Lacework IaC scanning results before merging!"
-            const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>`
+#       - name: Update Pull Request with a comment
+#         uses: actions/github-script@v6
+#         if: github.event_name == 'pull_request'
+#         with:
+#           script: |
+#             const { TESTS, TESTS_PASSED, TESTS_FAILED   } = process.env
+#             const message = "Verify the Lacework IaC scanning results before merging!"
+#             const test_results = `<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework TF-SCAN JUnit Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>`
 
-            const output = message + test_results
+#             const output = message + test_results
 
-            github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-            })  
+#             github.rest.issues.createComment({
+#             issue_number: context.issue.number,
+#             owner: context.repo.owner,
+#             repo: context.repo.repo,
+#             body: output
+#             })  
