@@ -30,6 +30,7 @@ export TASK_DEFINITION_NAME=$(terraform output -raw TASK_DEFINITION_NAME)
 ```
 
 4. Run a task:
+5. X
 
 ```bash
 python bin/run_task.py $CLUSTER_NAME $SUBNET_ID $SG_GROUP $TASK_DEFINITION_NAME
